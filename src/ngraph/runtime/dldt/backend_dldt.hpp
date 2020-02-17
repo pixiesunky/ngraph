@@ -16,12 +16,18 @@
 
 #pragma once
 
+#ifdef NGRAPH_DLDT_ENABLE
 #include <ie_core.hpp>
+#endif
 #include <string>
 #include "ngraph/ngraph.hpp"
 #include "ngraph/opsets/opset.hpp"
 #include "ngraph/runtime/dldt/dldt_tensor_view.hpp"
 #include "ngraph/runtime/tensor.hpp"
+
+InferenceEngine::Blob::Ptr fill_blob(InferenceEngine::SizeVector shape, std::vector<float> data);
+
+class Handle;
 
 namespace ngraph
 {
