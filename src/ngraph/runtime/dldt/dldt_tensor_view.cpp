@@ -20,30 +20,25 @@
 #include "dldt_tensor_view.hpp"
 #include "ngraph/descriptor/layout/tensor_layout.hpp"
 #include "ngraph/except.hpp"
-#include "ngraph/runtime/aligned_buffer.hpp"
-#include "ngraph/runtime/cpu/cpu_executor.hpp"
-#include "ngraph/runtime/cpu/cpu_layout_descriptor.hpp"
-#include "ngraph/runtime/cpu/mkldnn_utils.hpp"
 #include "ngraph/shape.hpp"
 #include "ngraph/util.hpp"
 
-using namespace mkldnn;
 using namespace ngraph;
 using namespace std;
 
-runtime::cpu::DLDTTensorView::DLDTTensorView(const ngraph::element::Type& element_type,
+runtime::dldt::DLDTTensorView::DLDTTensorView(const ngraph::element::Type& element_type,
                                              const PartialShape& shape)
     : runtime::Tensor(std::make_shared<ngraph::descriptor::Tensor>(element_type, shape, ""))
 {
 }
 
-runtime::cpu::DLDTTensorView::DLDTTensorView(const ngraph::element::Type& element_type,
-                                             const PartialShape& shape)
+runtime::dldt::DLDTTensorView::DLDTTensorView(const ngraph::element::Type& element_type,
+                                             const Shape& shape)
     : runtime::Tensor(std::make_shared<ngraph::descriptor::Tensor>(element_type, shape, ""))
 {
 }
 
-void runtime::cpu::DLDTTensorView::write(const void* source, size_t n)
+void runtime::dldt::DLDTTensorView::write(const void* p, size_t n)
 {
     const int8_t* v = (const int8_t*)p;
     if (v == nullptr)
@@ -52,7 +47,7 @@ void runtime::cpu::DLDTTensorView::write(const void* source, size_t n)
     std::copy(v, v + n, data.begin());
 }
 
-void runtime::cpu::DLDTTensorView::read(void* target, size_t n) const
+void runtime::dldt::DLDTTensorView::read(void* p, size_t n) const
 {
     int8_t* v = (int8_t*)p;
     if (v == nullptr)

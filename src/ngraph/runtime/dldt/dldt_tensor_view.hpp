@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "ngraph/runtime/dldt/dldt_backend_visibility.h"
+#include "ngraph/runtime/dldt/dldt_backend_visibility.hpp"
 #include "ngraph/runtime/tensor.hpp"
 #include "ngraph/type/element_type.hpp"
 
@@ -29,7 +29,7 @@ namespace ngraph
 {
     namespace runtime
     {
-        namespace cpu
+        namespace dldt
         {
             class DLDTTensorView : public ngraph::runtime::Tensor
             {

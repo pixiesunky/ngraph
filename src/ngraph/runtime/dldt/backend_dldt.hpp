@@ -35,8 +35,8 @@ namespace ngraph
                 explicit DLDT_Backend() = default;
                 ~DLDT_Backend() = default;
 
-                static std::shared_ptr<ov_runtime::Backend>
-                    create(std::string device, bool must_support_dynamic = false)
+                static std::shared_ptr<dldt::DLDT_Backend> create(std::string device,
+                                                                  bool must_support_dynamic = false)
                 {
                     return std::shared_ptr<Backend>(new Backend(device));
                 }
@@ -46,17 +46,17 @@ namespace ngraph
                 {
                 }
 
-                std::shared_ptr<ov_runtime::Tensor> create_tensor(ngraph::element::Type type,
-                                                                  ngraph::Shape shape)
+                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::element::Type type,
+                                                                    ngraph::Shape shape)
                 {
-                    return std::make_shared<ov_runtime::Tensor>(type, shape);
+                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
                 }
 
                 template <typename T>
-                std::shared_ptr<ov_runtime::Tensor>
+                std::shared_ptr<dldt::DLDTTensorView>
                     create_tensor(ngraph::element::Type type, ngraph::Shape shape, T* data)
                 {
-                    auto tensor = std::make_shared<ov_runtime::Tensor>(type, shape);
+                    auto tensor = std::make_shared<dldt::DLDTTensorView>(type, shape);
                     size_t size = 1;
                     for (auto x : shape)
                     {
@@ -68,15 +68,16 @@ namespace ngraph
                 }
 
                 template <class T>
-                std::shared_ptr<ov_runtime::Tensor> create_tensor(ngraph::Shape shape)
+                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::Shape shape)
                 {
-                    return std::make_shared<ov_runtime::Tensor>(ngraph::element::from<T>(), shape);
+                    return std::make_shared<dldt::DLDTTensorView>(ngraph::element::from<T>(),
+                                                                  shape);
                 }
 
-                std::shared_ptr<ov_runtime::Tensor>
+                std::shared_ptr<dldt::DLDTTensorView>
                     create_dynamic_tensor(ngraph::element::Type type, ngraph::PartialShape shape)
                 {
-                    return std::make_shared<ov_runtime::Tensor>(type, shape);
+                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
                 }
 
                 bool supports_dynamic_tensors() { return true; }
@@ -120,8 +121,8 @@ namespace ngraph
                 }
                 ~DLDT_Executable() = default;
 
-                bool call(const std::vector<std::shared_ptr<ov_runtime::DLDT_Tensor>>& outputs,
-                          const std::vector<std::shared_ptr<ov_runtime::DLDT_Tensor>>& inputs)
+                bool call(const std::vector<std::shared_ptr<dldt::DLDTTensorView>>& outputs,
+                          const std::vector<std::shared_ptr<dldt::DLDTTensorView>>& inputs)
                 {
                     try
                     {

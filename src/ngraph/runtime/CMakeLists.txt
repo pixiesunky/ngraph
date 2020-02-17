@@ -38,3 +38,7 @@ endif()
 if (NGRAPH_PLAIDML_ENABLE)
     add_subdirectory(plaidml)
 endif()
+
+if (NGRAPH_DLDT_ENABLE)
+    add_subdirectory(dldt)
+endif()
