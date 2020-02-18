@@ -28,7 +28,7 @@ if(NGRAPH_LIB_VERSIONING_ENABLE)
         SOVERSION ${NGRAPH_API_VERSION})
 endif()
 target_include_directories(libdldt_backend SYSTEM PUBLIC ${DLDT_INCLUDE_DIRS})
-target_link_libraries(libdldt_backend PUBLIC ngraph libdldt)
+target_link_libraries(libdldt_backend PUBLIC ngraph libdldt ${IE_MAIN_SOURCE_DIR}/include)
 install(TARGETS libdldt_backend LIBRARY DESTINATION ${NGRAPH_INSTALL_LIB})
 
 target_compile_definitions(libdldt_backend PRIVATE DLDT_BACKEND_EXPORTS)
