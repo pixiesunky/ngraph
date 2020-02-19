@@ -18,7 +18,7 @@
 #include <tbb/tbb_stddef.h>
 #endif
 
-#include "dldt_backend_visibility.hpp"
+#include "ngraph/runtime/dldt/dldt_backend_visibility.hpp"
 
 #include "ngraph/component_manager.hpp"
 #include "ngraph/graph_util.hpp"
@@ -37,8 +37,7 @@ using namespace ngraph;
 using namespace std;
 
 #include <ie_core.hpp>
-#include "backend_utils.hpp"
-#include "ngraph/ngraph.hpp"
+//#include "ngraph/ngraph.hpp"
 
 using namespace std;
 using namespace ngraph;
@@ -68,17 +67,7 @@ Blob::Ptr fill_blob(SizeVector shape, std::vector<float> data)
 
 extern "C" DLDT_BACKEND_API void ngraph_register_dldt_backend()
 {
-    runtime::BackendManager::register_backend("DLDT", [](const std::string& /* config */) {
-        static bool is_initialized = false;
-        if (!is_initialized)
-        {
-#if defined(NGRAPH_TBB_ENABLE)
-            // Force TBB to link to the backend
-            tbb::TBB_runtime_interface_version();
-#endif
-            ngraph::runtime::cpu::register_builders();
-            is_initialized = true;
-        }
-        return make_shared<runtime::cpu::DLDT_Backend>();
+    ngraph::runtime::BackendManager::register_backend("DLDLT", [](const std::string& config) {
+        return std::make_shared<ngraph::runtime::dldt::DLDT_Backend>(config);
     });
 }

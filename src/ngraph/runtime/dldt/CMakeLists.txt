@@ -16,13 +16,15 @@
 
 set(SRC
 	backend_dldt.cpp
-	dldt_tensor_view.cpp 
+	dldt_tensor_view.cpp
+	dldt_executable.hpp 
 )
-add_library(libdldt INTERFACE)
-target_link_libraries(libdldt INTERFACE ${DLDT_LIBRARIES})
+#add_library(libdldt INTERFACE)
+#target_link_libraries(libdldt INTERFACE ${DLDT_LIBRARIES})
 add_library(libdldt_backend SHARED ${SRC})
-target_include_directories(libdldt_backend SYSTEM PUBLIC ${DLDT_INCLUDE_DIRS})
-target_link_libraries(libdldt_backend PUBLIC ngraph libdldt ${IE_MAIN_SOURCE_DIR}/include)
+#target_include_directories(libdldt_backend SYSTEM PUBLIC ${DLDT_INCLUDE_DIRS})
+target_include_directories(libdldt_backend PUBLIC ${IE_MAIN_SOURCE_DIR}/include)
+target_link_libraries(libdldt_backend PRIVATE ngraph inference_engine)
 install(TARGETS libdldt_backend LIBRARY DESTINATION ${NGRAPH_INSTALL_LIB})
 
 target_compile_definitions(libdldt_backend PRIVATE DLDT_BACKEND_EXPORTS)

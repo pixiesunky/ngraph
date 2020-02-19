@@ -14,16 +14,14 @@
 // limitations under the License.
 //*****************************************************************************
 
-#pragma once
+//#pragma once
 
-#ifdef NGRAPH_DLDT_ENABLE
 #include <ie_core.hpp>
-#endif
 #include <string>
-#include "ngraph/ngraph.hpp"
 #include "ngraph/opsets/opset.hpp"
 #include "ngraph/runtime/dldt/dldt_tensor_view.hpp"
 #include "ngraph/runtime/tensor.hpp"
+//#include "ngraph/ngraph.hpp"
 
 InferenceEngine::Blob::Ptr fill_blob(InferenceEngine::SizeVector shape, std::vector<float> data);
 
@@ -35,68 +33,10 @@ namespace ngraph
     {
         namespace dldt
         {
-            class DLDT_Backend
-            {
-            public:
-                explicit DLDT_Backend() = default;
-                ~DLDT_Backend() = default;
-
-                static std::shared_ptr<dldt::DLDT_Backend> create(std::string device,
-                                                                  bool must_support_dynamic = false)
-                {
-                    return std::shared_ptr<Backend>(new Backend(device));
-                }
-
-                Backend(std::string _device)
-                    : device(_device)
-                {
-                }
-
-                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::element::Type type,
-                                                                    ngraph::Shape shape)
-                {
-                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
-                }
-
-                template <typename T>
-                std::shared_ptr<dldt::DLDTTensorView>
-                    create_tensor(ngraph::element::Type type, ngraph::Shape shape, T* data)
-                {
-                    auto tensor = std::make_shared<dldt::DLDTTensorView>(type, shape);
-                    size_t size = 1;
-                    for (auto x : shape)
-                    {
-                        size *= x;
-                    }
-                    std::vector<T> v(data, data + size);
-                    tensor->write(data, size * sizeof(T));
-                    return tensor;
-                }
-
-                template <class T>
-                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::Shape shape)
-                {
-                    return std::make_shared<dldt::DLDTTensorView>(ngraph::element::from<T>(),
-                                                                  shape);
-                }
-
-                std::shared_ptr<dldt::DLDTTensorView>
-                    create_dynamic_tensor(ngraph::element::Type type, ngraph::PartialShape shape)
-                {
-                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
-                }
-
-                bool supports_dynamic_tensors() { return true; }
-                std::shared_ptr<Executable> compile(std::shared_ptr<Function> func)
-                {
-                    return std::make_shared<Executable>(func, device);
-                }
-
-                std::string device;
-            };
-
             class DLDT_Executable : public Executable
             {
+		InferenceEngine::CNNNetwork network;
+        	std::string device;
             public:
                 DLDT_Executable(std::shared_ptr<Function> func, std::string _device)
                 {
@@ -183,7 +123,91 @@ namespace ngraph
                         THROW_IE_EXCEPTION << "FAILED";
                     }
                 }
-            }
+            };
+	    class DLDT_Backend : public runtime::Backend
+	    {
+		public:
+		std::string device; 
+		DLDT_Backend(const std::string & _device) : device(_device) { }
+		~DLDT_Backend() { }
+		static std::shared_ptr<Backend> create(const std::string device,
+                                                                  bool must_support_dynamic = false) {
+			return std::shared_ptr<dldt::DLDT_Backend>(new dldt::DLDT_Backend(device));
+                }
+		std::shared_ptr<ngraph::runtime::Tensor> create_tensor(const ngraph::element::Type& element_type, const Shape& shape) {
+			return std::make_shared<dldt::DLDTTensorView>(element_type, shape);
+		}
+		std::shared_ptr<ngraph::runtime::Tensor> create_tensor(const ngraph::element::Type& element_type, const Shape& shape, void* memory_pointer) {
+			return std::make_shared<dldt::DLDTTensorView>(element_type, shape, memory_pointer);
+		}
+
+		std::shared_ptr<Executable> compile(std::shared_ptr<Function> func, bool enable_performance_data = false) {
+			return std::make_shared<DLDT_Executable>(func, device);
+		}	
+		bool is_supported(const Node& node) const {
+			return false;
+		}
+		bool is_supported_property(const Property prop) const;
+		//void remove_compiled_function(std::shared_ptr<DLDT_Executable> exec);
+	    };
+		/*
+            class DLDT_Backend : public runtime::Backend
+            {
+            public:
+                static std::shared_ptr<dldt::DLDT_Backend> create(const std::string device,
+                                                                  bool must_support_dynamic = false)
+                {
+                    return std::shared_ptr<Backend>(new Backend(device));
+                }
+
+                DLDT_Backend(std::string _device)
+                    : device(_device)
+                {
+                }
+
+                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::element::Type type,
+                                                                    ngraph::Shape shape)
+                {
+                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
+                }
+
+                template <typename T>
+                std::shared_ptr<dldt::DLDTTensorView>
+                    create_tensor(ngraph::element::Type type, ngraph::Shape shape, T* data)
+                {
+                    auto tensor = std::make_shared<dldt::DLDTTensorView>(type, shape);
+                    size_t size = 1;
+                    for (auto x : shape)
+                    {
+                        size *= x;
+                    }
+                    std::vector<T> v(data, data + size);
+                    tensor->write(data, size * sizeof(T));
+                    return tensor;
+                }
+
+                template <class T>
+                std::shared_ptr<dldt::DLDTTensorView> create_tensor(ngraph::Shape shape)
+                {
+                    return std::make_shared<dldt::DLDTTensorView>(ngraph::element::from<T>(),
+                                                                  shape);
+                }
+
+                std::shared_ptr<dldt::DLDTTensorView>
+                    create_dynamic_tensor(ngraph::element::Type type, ngraph::PartialShape shape)
+                {
+                    return std::make_shared<dldt::DLDTTensorView>(type, shape);
+                }
+
+                bool supports_dynamic_tensors() { return true; }
+                std::shared_ptr<Executable> compile(std::shared_ptr<Function> func)
+                {
+                    return std::make_shared<Executable>(func, device);
+                }
+
+                std::string device;
+            };*/
+            };
         }
     }
 }
